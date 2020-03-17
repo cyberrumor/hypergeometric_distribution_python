@@ -8,6 +8,7 @@ N = [i for i in range(1, int(input("Enter total sample size: ")) + 1)]
 if (N == []):
 	print()
 	print('I have nothing to test.')
+	print()
 	exit()
 
 # possible success
@@ -21,42 +22,64 @@ if (M == []):
 if (N == [1]) and ( M == [1]):
 	print()
 	print('100.000%')
+	print()
 	exit()
 
 if (M > N):
 	print()
 	print('Possible successes must be less than sample size.')
+	print()
 	exit()
 
 # required success
+failures = False
+
 k = [i for i in range(1, int(input("Enter required successes: ")) + 1)]
 
 if (k == []):
-	print()
-	print('Requires non-zero. Try testing for', N[-1] - M[-1] ,'failure/s instead.')
-	exit()
+	k = [i for i in range(1, N[-1] - M[-1] + 1)]
+	failures = True
+	M = k
 
 if (k[-1] > M[-1]):
 	print()
-	print('0.000%')
+	print('Required successes must be greater than possible successes.')
+	print()
 	exit()
 
 # trials
-n = [i for i in range(1, int(input("Enter number of trials: ")) + 1)] 
-
-if (n == [0]):
-	print()
-	print('0.000%')
-	exit()
+n = [i for i in range(1, int(input("Enter number of trials: ")) + 1)]
 
 if (n == []):
 	print()
 	print('0.000%')
+	print()
 	exit()
 
 if (n == [1]):
 	print()
-	print("{0:.3%}".format(M[-1] / N[-1]), '(number of required successes ignored).')
+	if failures:
+		print("{0:.3%}".format(M[-1] / N[-1]), 'chance of 0 successes.')
+		print()
+		exit()
+	else:
+		print("{0:.3%}".format(M[-1] / N[-1]), '(number of required successes assumed to be 1).')
+		print()
+		exit()
+
+if failures:
+	k = n
+
+if (n[-1] < k[-1]):
+	print()
+	print('Number of trials must be greater than number of required successes.') 
+	print()
+	exit()
+
+if (n[-1] == N[-1] and M[-1] > 0):
+	print()
+	print('0.000%')
+	print()
 	exit()
 
 # possible failures
@@ -64,12 +87,9 @@ g = [i for i in range(1, N[-1] - M[-1] + 1)]
 
 # required failures
 if (k == n):
-	h = [1]
+	h = [0]
 else:
 	h = [i for i in range(1, n[-1] - k[-1] + 1)]
-	if (h == []):
-		print(' h was not set correctly, must program cases where required successes > trials')
-		exit()
 
 # getdenom
 def getdenom(a, b):
