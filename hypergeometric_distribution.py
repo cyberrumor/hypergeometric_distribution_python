@@ -49,6 +49,16 @@ if (n == [0]):
 	print('0.000%')
 	exit()
 
+if (n == []):
+	print()
+	print('0.000%')
+	exit()
+
+if (n == [1]):
+	print()
+	print("{0:.3%}".format(M[-1] / N[-1]), '(number of required successes ignored).')
+	exit()
+
 # possible failures
 g = [i for i in range(1, N[-1] - M[-1] + 1)]
 
@@ -57,6 +67,9 @@ if (k == n):
 	h = [1]
 else:
 	h = [i for i in range(1, n[-1] - k[-1] + 1)]
+	if (h == []):
+		print(' h was not set correctly, must program cases where required successes > trials')
+		exit()
 
 # getdenom
 def getdenom(a, b):
