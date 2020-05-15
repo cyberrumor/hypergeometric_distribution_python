@@ -144,3 +144,7 @@ else:
 print()
 print("{0:.3%}".format(top / bottom))
 print()
+
+input('[Enter] to exit')
+print()
+
