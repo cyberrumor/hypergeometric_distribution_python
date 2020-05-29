@@ -1,9 +1,7 @@
-#/bin/python
+#!/usr/bin/python3
 
-print()
-
-# total sample
 N = [i for i in range(1, int(input("Enter total sample size: ")) + 1)]
+# N = [i for i in range(1, int(input()) + 1)]
 
 if (N == []):
 	print()
