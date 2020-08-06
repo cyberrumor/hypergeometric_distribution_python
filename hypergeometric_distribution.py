@@ -1,119 +1,84 @@
 #!/usr/bin/python3
+import os
+import signal
 
-N = [i for i in range(1, int(input("Enter total sample size: ")) + 1)]
-# N = [i for i in range(1, int(input()) + 1)]
+# graceful exit on [ctrl] + c
+def signal_handler(sig, frame):
+	print()
+	quit()
+signal.signal(signal.SIGINT, signal_handler)
 
-if (N == []):
-	print()
-	print('I have nothing to test.')
-	print()
-	exit()
-
-# possible success
-M = [i for i in range(1, int(input("Enter possible successes: ")) + 1)] 
-
-if (M == []):
-	print()
-	print('0.000%')
-	exit()
-
-if (N == [1]) and ( M == [1]):
-	print()
-	print('100.000%')
-	print()
-	exit()
-
-if (M > N):
-	print()
-	print('Possible successes must be less than sample size.')
-	print()
-	exit()
-
-# required success
 failures = False
 
-k = [i for i in range(1, int(input("Enter required successes: ")) + 1)]
+# sample size
+def getN():
+	while True:
+		try:
+			test = int(input("Enter total sample size: "))
+			if test > 3:
+				break
+			print("Requires integer greater than 3")
+		except Exception as e:
+			print(e)
+	return [i for i in range(1, test + 1)]
 
-if (k == []):
-	k = [i for i in range(1, N[-1] - M[-1] + 1)]
-	failures = True
-	M = k
+# possible success
+def getM():
+	while True:
+		try:
+			test = int(input("Enter possible successes: "))
+			if test < N[-1] and test > 0:
+				break
+			print("Possible successes must be between 0 and " + str(N[-1]))
+		except Exception as e:
+			print(e)
+	return [i for i in range(1, test + 1)]
 
-if (k[-1] > M[-1]):
-	print()
-	print('Required successes must be greater than possible successes.')
-	print()
-	exit()
+# required successes
+def getK():
+	while True:
+		try:
+			test = int(input("Enter required number of successes: "))
+			if test == 0:
+				global failures
+				failures = True
+				return [i for i in range(1, N[-1] - M[-1] + 1)]
+			if test <= M[-1]:
+				break
+			print("Required successes must be less than or equal to " + str(M[-1]))
+		except Exception as e:
+			print(e)
+	return [i for i in range(1, test + 1)]
 
 # trials
-n = [i for i in range(1, int(input("Enter number of trials: ")) + 1)]
-
-if (n == []):
-	print()
-	print('0.000%')
-	print()
-	exit()
-
-if (n == [1]):
-	print()
-	if failures:
-		print("{0:.3%}".format(M[-1] / N[-1]), 'chance of 0 successes.')
-		print()
-		exit()
-	else:
-		print("{0:.3%}".format(M[-1] / N[-1]), '(number of required successes assumed to be 1).')
-		print()
-		exit()
-
-if failures:
-	k = n
-
-if (n[-1] < k[-1]):
-	print()
-	print('Number of trials must be greater than number of required successes.') 
-	print()
-	exit()
-
-if (n[-1] == N[-1] and M[-1] > 0):
-	print()
-	print('0.000%')
-	print()
-	exit()
+def getT():
+	while True:
+		try:
+			test = int(input("Enter number of trials: "))
+			if failures and (test >= 1) and (test <= N[-1]):
+				break
+			if (test >= K[-1]) and (test <= N[-1]):
+				break
+			if failures:
+				print("Trials must be between 1 and " + str(N[-1]))
+			else:
+				print("Trials must be between " + str(K[-1]) + " and " + str(N[-1]))
+		except Exception as e:
+			print(e)
+	return [i for i in range(1, test + 1)]
 
 # possible failures
-g = [i for i in range(1, N[-1] - M[-1] + 1)]
+def getG():
+	return [i for i in range(1, N[-1] - M[-1] +1)]
 
 # required failures
-if (k == n):
-	h = [0]
-else:
-	h = [i for i in range(1, n[-1] - k[-1] + 1)]
-
-# getdenom
-def getdenom(a, b):
-	denominator = [i for i in range(1, b + 1)]
-	return(denominator)
-
-# getnum
-def getnum(a, b):
-	if (a == b):
-		numerator = [1]
+def getH():
+	if K == T:
+		return [0]
 	else:
-		numerator = a[a[-1] - b[-1]:]
-	return(numerator)
+		return [i for i in range(1, T[-1] - K[-1] + 1)]
 
-topleftnum = getnum(M, k)
-topleftdenom = getdenom(M[-1], k[-1])
-
-if (g == h):
-	toprightnum = g
-else:
-	toprightnum = getnum(g, h)
-toprightdenom = getdenom(g[-1], h[-1])
-
-bottomnum = getnum(N, n)
-bottomdenom = getdenom(N[-1], n[-1])
-
+# factorial
 def factory(list):
 	i = 0
 	e = 1
@@ -121,28 +86,99 @@ def factory(list):
 		e = e*i
 	return(e)
 
-topleftnum = factory(topleftnum)
-topleftdenom = factory(topleftdenom)
+# denominator
+def getdenom(a, b):
+	return  [i for i in range(1, b + 1)]
 
-toprightnum = factory(toprightnum)
-toprightdenom = factory(toprightdenom)
+# numerator
+def getnum(a, b):
+	if a == b:
+		return [1]
+	else:
+		return a[a[-1] - b[-1]:]
 
-bottomnum = factory(bottomnum)
-bottomdenom = factory(bottomdenom)
+if __name__ == "__main__":
+	escape = "[Enter] to exit"
+	N = getN()
+	M = getM()
+	K = getK()
 
-if (n == [1]):
-	top = k[-1]
-	bottom = N[-1]
-else:
-	topleft = topleftnum / topleftdenom
-	topright = toprightnum / toprightdenom
-	top = topleft * topright
-	bottom = bottomnum / bottomdenom
+	# if you're testing for 0 failures, you're actually testing for 1 - chance of successes
+	if failures:
+		V = M
+		M = K
+		K = V
 
-print()
-print("{0:.3%}".format(top / bottom))
-print()
+	T = getT()
 
-input('[Enter] to exit')
-print()
+	# sanity check 2
+	if K[-1] == M[-1] and T[-1] == N[-1]:
+		print("100.000%")
+		input(escape)
+		exit()
 
+	# sanity check 3
+	if T == [1]:
+		if failures:
+			print("{0:.3%}".format(M[-1] / N[-1]), 'chance of 0 successes.')
+			print("a")
+			input(escape)
+			exit()
+		else:
+			print("{0:.3%}".format(M[-1] / N[-1]))
+			input(escape)
+			exit()
+
+	# sanity check 4
+	if failures:
+		K = T
+		# if you draw the whole deck and require 0 failures, you fail.
+		if T[-1] == N[-1] and M[-1] > 0:
+			print('0.000%')
+			print()
+			input(escape)
+			exit()
+
+	G = getG()
+	H = getH()
+
+	topleftnum = getnum(M, K)
+	topleftdenom = getdenom(M[-1], K[-1])
+
+	if (G == H):
+		toprightnum = G
+	else:
+		toprightnum = getnum(G, H)
+
+	toprightdenom = getdenom(G[-1], H[-1])
+	bottomnum = getnum(N, T)
+	bottomdenom = getdenom(N[-1], T[-1])
+
+	topleftnum = factory(topleftnum)
+	topleftdenom = factory(topleftdenom)
+
+	toprightnum = factory(toprightnum)
+	toprightdenom = factory(toprightdenom)
+
+	bottomnum = factory(bottomnum)
+	bottomdenom = factory(bottomdenom)
+
+	if (T == [1]):
+		top = K[-1]
+		bottom = N[-1]
+	else:
+		topleft = topleftnum / topleftdenom
+		topright = toprightnum / toprightdenom
+		top = topleft * topright
+		bottom = bottomnum / bottomdenom
+
+	print()
+	if failures:
+		print("{0:.3%}".format(top / bottom) + " chance of 0 successes")
+		print()
+		input(escape)
+	else:
+		print("{0:.3%}".format(top / bottom))
+		print()
+		input(escape)
+	exit()
